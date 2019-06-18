@@ -1,8 +1,26 @@
 # SnowBlower
 
-## Objectives
-Use ICESat-2 data to gain an understanding of the relationship between blowing snow and environmental conditions. Interpret ICESat-2 blowing snow flags and perhaps develop a better algorithm for creating these flags. Combine data to create spatial maps if possible.
+## Members
+
+Robbie Mallett (TL)
+Eric Keenan
+Jeffrey Mei
+Tabby Fuson
+Ethan Campbell
+Zheng Liu
+
+## Science Questions
+
+How do ICESat-2 blowing snow statistics depend on environmental conditions?
+
+What is the sensitivity of the blowing snow algorithm. Can we identify false positives?
+
+What is the spatial variability of the ICESat-2 blowing snow events?
+
+## Technical Goals
+
+Develop a blowing snow product. Can we make a gridded climatology for high latitudes?
 
 ## Datasets
 
-## Is there a template? 
+Primary: ATL 06

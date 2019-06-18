@@ -1,0 +1,22 @@
+The purpose of this document is to serve as a list of ideas, to do tasks, problems, etc.
+
+Eric:
+	To Do:
+		- Retrieve binary (yes or no) or confidence level (high, medium, low)
+		timestamped and geolocated arrays on the occurence of blowing snow. 
+
+		- Retrieve regional climate model (RACMO or MAR for land ice, for sea ice???)
+		that quantifies blowing snow.
+
+		- Retrieve reanalysis (MERRA-2, ERA-Interim, ERA-5) for air temperature, 
+		wind speeds, snowdepth, etc. 
+	Ideas:
+		- Compare IceSAT-2 blowing snow to regional cliamte models and reanalysis
+		data sets. 
+		
+		- Develop routines such that they can be generalized to any point of interest. 
+
+		- Would be interesting to look along the 88 degrees south line of latitude as 
+		there are many IS-2 tracks already available then. 
+
+	Problems:

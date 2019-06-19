@@ -208,8 +208,8 @@ coverage = '/ancillary_data/atlas_sdp_gps_epoch,\
 /gt1r/land_ice_segments/geophysical,\
 /gt2l/land_ice_segments/geophysical,\
 /gt2r/land_ice_segments/geophysical,\
-/gt2l/land_ice_segments/geophysical,\
-/gt2r/land_ice_segments/geophysical,\
+/gt3l/land_ice_segments/geophysical,\
+/gt3r/land_ice_segments/geophysical,\
 /gt1l/land_ice_segments/h_li_sigma,\
 /gt1l/land_ice_segments/latitude,\
 /gt1l/land_ice_segments/longitude,\

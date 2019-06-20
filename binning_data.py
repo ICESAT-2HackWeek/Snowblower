@@ -1,14 +1,16 @@
 import numpy as np
 import h5py
 import pandas as pd
+import os
 
-def strip_data_one(h5path, savepath):
+def downsample(h5path):
 	lon_range = np.arange(-180, 179.9, 0.75)
 	lat_range = np.arange(-69.75, -90.1, -0.75)+0.375
 	laser_strs = ['gt1r','gt2r','gt3r', 'gt1l','gt2l','gt3l']
-	f = h5py.File(h5path, 'r') 
+	f = h5py.File(h5path,'r')
 
-	df = pd.DataFrame(columns = ['laser', 'lon', 'lat', 'bs_conf', 'bs_conf_x2', 'bs_od', 'bs_od_x2', 'bs_h', 'bs_h_x2', 'N','% seg', 'h_li', 'mean_timestamp (s)', 'mean_timestamp (yr)']) 
+	df = pd.DataFrame(columns = ['laser', 'lon', 'lat', 'bs_conf', 'bs_conf_x2', 'bs_od', 'bs_od_x2', 'bs_h', 'bs_h_x2',
+								 'N','%_seg', 'h_li', 'mean_timestamp_s', 'mean_timestamp_yr'])
 
 	l=0
 	for k in range(len(laser_strs)):
@@ -59,12 +61,21 @@ def strip_data_one(h5path, savepath):
 					pc_seg = len(filt[0])/N*100
 					#don't forget to store N
 					hli_mean = np.mean(all_hli[filt])
-					df2 = [lastr, all_lons.mean(), all_lats.mean(), bconf_mean, bconf_x2, bod_mean, bod_x2, bh_mean, bh_x2, N, pc_seg, hli_mean, mean_time, mean_year]
+					df2 = [lastr, all_lons.mean(), all_lats.mean(), bconf_mean, bconf_x2, bod_mean, bod_x2, bh_mean,
+						   bh_x2, N, pc_seg, hli_mean, mean_time, mean_year]
 					df.loc[l] = df2
 					l+=1
 				else:
 					pass
 
-	df.to_csv(savepath)
 	f.close()
-	return
+	return df
+
+
+def downsample_all(dir,output_filename):
+	all_datafiles = os.listdir(dir)
+	all_df = []
+	for file in all_datafiles:
+		all_df.append(downsample(dir + '/' + file))
+	final_df = pd.concat(all_df)
+	final_df.to_csv(dir + '/' + output_filename)

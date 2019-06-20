@@ -1,70 +1,69 @@
 import numpy as np
-import cartopy.crs as ccrs
-import matplotlib.pyplot as plt
-from plot_tracks import show_plot, plot_tracks
-import cartopy
-fakelons = 180 - np.random.random(50000)*360
-fakelats = (np.random.random(50000)*30+60)*-1
-fake_var = (np.random.random(50000)*0.7+0.3)*fakelons
+import h5py
+import pandas as pd
 
+def strip_data_one(h5path, savepath):
+	lon_range = np.arange(-180, 179.9, 0.75)
+	lat_range = np.arange(-69.75, -90.1, -0.75)+0.375
+	laser_strs = ['gt1r','gt2r','gt3r', 'gt1l','gt2l','gt3l']
+	f = h5py.File(h5path, 'r') 
 
+	df = pd.DataFrame(columns = ['laser', 'lon', 'lat', 'bs_conf', 'bs_conf_x2', 'bs_od', 'bs_od_x2', 'bs_h', 'bs_h_x2', 'N','% seg', 'mean_timestamp (s)', 'mean_timestamp (yr)']) 
 
-lon_range = np.arange(-180, 180, 0.75)
-lat_range = np.arange(-60, -90, -0.75)
+	l=0
+	for k in range(len(laser_strs)):
+		lastr = laser_strs[k]
+		lat = f[lastr+'/lat'][:]
+		lon = f[lastr+'/lon'][:]
+		bsnow_conf = f[lastr+'/bsnow_conf'][:]
+		bsnow_od  = f[lastr+'/bsnow_od'][:]
+		bsnow_h = f[lastr+'/bsnow_h'][:]
+		dt = f[lastr+'/t_sec'][:]
+		dy = f[lastr+'/t_year'][:]
+		h_li = f[lastr+'/h_li'][:]
 
-lon_inds = np.digitize(fakelons, lon_range)
-lat_inds = np.digitize(fakelats, lat_range)
+		lon[lon>179.625]-=360
+		lon_inds = np.digitize(lon, lon_range)
+		lat_inds = np.digitize(lat, lat_range)
 
-meaned_data = np.zeros((lon_range.size, lat_range.size))
-std_data = np.zeros((lon_range.size, lat_range.size))
-## indexed as [lon, lat]
+		for i in range(len(lon_range)):
+			for j in range(len(lat_range)):
 
-for i in range(len(meaned_data)):
-	for j in range(len(meaned_data[i])):
-		
-		grab_inds = np.argwhere((lat_inds == j)*(lon_inds==i))
-		#do we want to set a test for nans? if indexes are empty
-		meaned_data[i, j] = np.mean(fake_var[grab_inds])
-		std_data[i, j] = np.std(fake_var[grab_inds])
+				# i = 257
+				# j = 15
 
-fig = plt.figure(figsize=(11,8))
-## below section is required to get a nice triangular arrangement
-gs0 = fig.add_gridspec(2, 1)
-gs00 = gs0[0].subgridspec(1, 6)
-gs01 = gs0[1].subgridspec(1, 6)
+				grab_inds = np.argwhere((lat_inds == j)*(lon_inds==i))
+				if len(grab_inds)>0:
+					N = len(grab_inds)
+					# print (i,j)
+					all_lons = lon[grab_inds]
+					all_lats = lon[grab_inds]
+					
+					# mean_lat = np.mean(all_lats)
+					
 
-ax1 = fig.add_subplot(gs00[0,1:5], projection=ccrs.SouthPolarStereo())
-show_plot(ax1)
+					all_b_conf = bsnow_conf[grab_inds]
+					all_b_od = bsnow_od[grab_inds]
+					all_b_h = bsnow_h[grab_inds]
 
-# .subplot(2,2,(1,2), projection=ccrs.SouthPolarStereo())	
-plt.title("Raw data, with noise added")
-plot_tracks(fakelons, fakelats, variable=fake_var, cmap='bwr')
-cbar0 = plt.colorbar(ax=ax1)
-cbar0.set_label("Raw longitude")
+					mean_time = np.mean(dt[grab_inds])
+					mean_year = np.mean(dy[grab_inds])
+					filt = np.where(all_b_h<10000)
+					# assert(len(filt)>0)
+					bconf_mean = np.mean(all_b_conf[filt])
+					bod_mean = np.mean(all_b_od[filt])
+					bh_mean = np.mean(all_b_h[filt])
+					bconf_x2 = np.sum(all_b_conf[filt]**2)
+					bod_x2 = np.sum(all_b_od[filt]**2)
+					bh_x2 = np.sum(all_b_h[filt]**2)
+					pc_seg = len(filt[0])/N*100
+					#don't forget to store N
 
-# ax2 = plt.subplot(223, projection=ccrs.SouthPolarStereo())	
-ax2 = fig.add_subplot(gs01[0,:3], projection=ccrs.SouthPolarStereo())
-show_plot(ax2)
-plt.title("Binned (mean) data")
-data_crs = ccrs.PlateCarree()
-xx, yy = np.meshgrid(lon_range, lat_range)
-plt.pcolormesh(xx, yy, meaned_data.T, transform=data_crs, cmap='bwr')
-cbar = plt.colorbar(ax=ax2)
-cbar.set_label("Colorbar Label (unit)")
+					df2 = [lastr, all_lons.mean(), all_lats.mean(), bconf_mean, bconf_x2, bod_mean, bod_x2, bh_mean, bh_x2, N, pc_seg, mean_time, mean_year]
+					df.loc[l] = df2
+					l+=1
+				else:
+					pass
 
-# ax3 = plt.subplot(224, projection=ccrs.SouthPolarStereo())	
-ax3 = fig.add_subplot(gs01[0,3:], projection=ccrs.SouthPolarStereo())
-
-show_plot(ax3)
-
-plt.pcolormesh(xx, yy, std_data.T, transform=data_crs)
-cbar2 = plt.colorbar()
-cbar2.set_label("Standard deviation")
-
-
-ax1.add_feature(cartopy.feature.COASTLINE)
-ax2.add_feature(cartopy.feature.COASTLINE)
-ax3.add_feature(cartopy.feature.COASTLINE, edgecolor='w')
-
-plt.tight_layout()
-plt.show()
+	df.to_csv(savepath)
+	return

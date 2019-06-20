@@ -119,7 +119,6 @@ def ecmwf(date_range='1979-01-01/to/2017-08-31',area='-40/-90/-90/90',type='an',
         elif param == 'u10':  param_codes += '165.128'  # 10 metre U wind component (m/s)
         elif param == 'v10':  param_codes += '166.128'  # 10 metre V wind component (m/s)
         elif param == 'si10': param_codes += '207.128'  # 10 metre wind speed (m/s) [NOTE: in monthly means only]
-        elif param == 'blh':  param_codes += '159.128'  # Boundary layer height (m)
         elif param == 'lcc':  param_codes += '186.128'  # Low cloud cover (fractional coverage, 0 to 1)
         elif param == 'tcc':  param_codes += '164.128'  # Total cloud cover (fractional coverage, 0 to 1)
         elif param == 'rsn':  param_codes +=  '33.128'  # Snow density in snow layer (kg/m^3)
@@ -137,6 +136,7 @@ def ecmwf(date_range='1979-01-01/to/2017-08-31',area='-40/-90/-90/90',type='an',
         elif param == 'tp':   param_codes += '228.128'  # Total precipitation (m) *
         elif param == 'iews': param_codes += '229.128'  # Instantaneous eastward turbulent surface stress (N/m^2)
         elif param == 'inss': param_codes += '230.128'  # Instantaneous northward turbulent surface stress (N/m^2)
+        elif param == 'blh':  param_codes += '159.128'  # Boundary layer height (m)
         if param_idx < len(params)-1: param_codes += '/'
 
     retrieve_dict = {
@@ -574,8 +574,8 @@ def along_track(lats,lons,datetimes,data_dir,erai_analysis_filename,erai_forecas
 
 if __name__== "__main__":
     # control flow
-    download_ecmwf = True
-    process_ecmwf = False
+    download_ecmwf = False
+    process_ecmwf = True
     load_erai_land_sea_mask = True
 
     # filepaths
@@ -589,20 +589,20 @@ if __name__== "__main__":
     #       and save using filenames in comments in folder 'ERA_Interim_unprocessed'
     #       then run 'process_ecmwf' routine below
     if download_ecmwf:
-        which_to_download = 3  # change to submit one at a time (see note above) - recommend order 3, 4, 1, 2
+        which_to_download = 1  # change to submit one at a time (see note above) - recommend order 3, 4, 1, 2
 
         if which_to_download == 1:      # analysis; save as 'erai_SH_analysis.nc'
             ecmwf(date_range='2018-10-10/to/2019-01-01',area='-53/-180/-90/180',output_filename=None,type='an',
-                  step='0',time='00/06/12/18',params=['skt','t2m','u10','v10','blh','lcc','tcc','rsn','sd','sr','tsn'])
+                  step='0',time='00/06/12/18',params=['skt','t2m','u10','v10','lcc','tcc','rsn','sd','sr','tsn'])
         elif which_to_download == 2:    # forecast; save as 'erai_SH_forecast.nc'
             ecmwf(date_range='2018-10-10/to/2019-01-01',area='-53/-180/-90/180',output_filename=None,type='fc',
-                  step='6/12',time='00/12',params=['tp','sf'])
+                  step='6/12',time='00/12',params=['tp','sf','blh'])
         elif which_to_download == 3:    # analysis; save as 'erai_NH_analysis.nc'
             ecmwf(date_range='2018-10-10/to/2019-01-01',area='90/-180/55/180',output_filename=None,type='an',
-                  step='0',time='00/06/12/18',params=['skt','t2m','u10','v10','blh','lcc','tcc','rsn','sd','sr','tsn'])
+                  step='0',time='00/06/12/18',params=['skt','t2m','u10','v10','lcc','tcc','rsn','sd','sr','tsn'])
         elif which_to_download == 4:    # forecast; save as 'erai_NH_forecast.nc'
             ecmwf(date_range='2018-10-10/to/2019-01-01',area='90/-180/55/180',output_filename=None,type='fc',
-                  step='6/12',time='00/12',params=['tp','sf'])
+                  step='6/12',time='00/12',params=['tp','sf','blh'])
 
     # process newly downloaded ECMWF reanalysis files (calculate derived quantities, de-accumulate, and re-export)
     # note: once finished, manually delete unprocessed files and any processed chunks

@@ -66,4 +66,5 @@ def strip_data_one(h5path, savepath):
 					pass
 
 	df.to_csv(savepath)
+	f.close()
 	return

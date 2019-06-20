@@ -155,4 +155,10 @@ def process_all(dir):
 def read_h5(fname,vnames=[]):
     """ Simple HDF5 reader. """
     with h5py.File(fname,'r') as f:
-        return [f[v][:] for v in vnames]
+        beam_keys = f.keys()
+        data = dict()
+        for bk in beam_keys:
+            data[bk] = dict()
+            for vn in vnames:
+                data[bk][vn] = f[bk][vn][:]
+    return data

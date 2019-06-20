@@ -6,14 +6,6 @@ import cartopy
 import matplotlib.pyplot as plt
 import matplotlib.path as mpath
 
-os.chdir("/home/jeffrey/Snowblower/jeffdata/")
-ls = glob.glob("*.h5")
-f = h5py.File(ls[-1], 'r') 
-lat = f['gt1l/land_ice_segments/latitude'][:]
-lon = f['gt1l/land_ice_segments/longitude'][:]
-bsnow_conf = f['gt1l/land_ice_segments/geophysical/bsnow_conf'][:]
-dt = f['gt1l/land_ice_segments/delta_time'][:]
-h_li = f['gt1l/land_ice_segments/h_li'][:]
 def show_plot(ax1):
 	ax1.set_extent([-180, 180, -90, -65], ccrs.PlateCarree())
 	ax1.add_feature(cartopy.feature.LAND)
@@ -33,6 +25,18 @@ def plot_tracks(lon, lat, variable, time_range = None, **kwargs):
 	else:
 		plt.plot(lon, lat, transform = ccrs.PlateCarree(), **kwargs)
 	return 
+
+#################################################
+os.chdir("/home/jeffrey/Snowblower/jeffdata/")
+ls = glob.glob("*.h5")
+f = h5py.File(ls[-1], 'r') 
+#################################################
+
+lat = f['gt1l/latitude'][:]
+lon = f['gt1l/longitude'][:]
+bsnow_conf = f['gt1l/bsnow_conf'][:]
+dt = f['gt1l/delta_time'][:]
+h_li = f['gt1l/h_li'][:]
 
 ax1 = plt.subplot(111, projection=ccrs.SouthPolarStereo())	
 plot_tracks(lon, lat, bsnow_conf)

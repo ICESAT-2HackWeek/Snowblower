@@ -27,20 +27,20 @@ def plot_tracks(lon, lat, variable, time_range = None, **kwargs):
 	return 
 
 #################################################
-os.chdir("/home/jeffrey/Snowblower/jeffdata/")
+os.chdir("./Small_data/")
 ls = glob.glob("*.h5")
-f = h5py.File(ls[-1], 'r') 
+f = h5py.File(ls[0], 'r') 
 #################################################
 
-lat = f['gt1l/latitude'][:]
-lon = f['gt1l/longitude'][:]
+lat = f['gt1l/lat'][:]
+lon = f['gt1l/lon'][:]
 bsnow_conf = f['gt1l/bsnow_conf'][:]
-dt = f['gt1l/delta_time'][:]
+dt = f['gt1l/t_sec'][:]
 h_li = f['gt1l/h_li'][:]
 
 ax1 = plt.subplot(111, projection=ccrs.SouthPolarStereo())	
 plot_tracks(lon, lat, bsnow_conf)
-plot_tracks(lon-90, lat, None)
+plot_tracks(lon, lat, None, c='r')
 cbar = plt.colorbar()
 cbar.set_label("Colorbar Label")
 show_plot(ax1)

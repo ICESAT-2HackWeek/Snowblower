@@ -38,18 +38,18 @@ from requests.auth import HTTPBasicAuth
 ############################################################ Begin User Input
 
 # Download note
-download_note = "Novo_bbox"
+download_note = "AIS_bbox"
 
 # Input data set ID (e.g. ATL06) of interest here, also known as "short name".
 short_name = 'ATL06'
 
 # Input bounding box
 # Input lower left longitude in decimal degrees
-LL_lon = '9'
+LL_lon = '-180'
 # Input lower left latitude in decimal degrees
-LL_lat = '-72'
+LL_lat = '-90'
 # Input upper right longitude in decimal degrees
-UR_lon = '15'
+UR_lon = '180'
 # Input upper right latitude in decimal degrees
 UR_lat = '-70'
 
@@ -59,7 +59,7 @@ start_date = '2018-10-15'
 # Input start time in HH:mm:ss format
 start_time = '00:00:00'
 # Input end date in yyyy-MM-dd format
-end_date = '2018-10-31'
+end_date = '2018-10-21'
 # Input end time in HH:mm:ss format
 end_time = '23:59:59'
 
@@ -68,14 +68,13 @@ end_time = '23:59:59'
 # Enter your Earthdata Login user name
 uid = 'eric_keenan'
 # Enter your email address associated with your Earthdata Login account
-email = 'eric.keenan@colorado.edu'
+email = 'test_eric.keenan@colorado.edu'
 pswd = getpass.getpass('Earthdata Login:')
 
 ############################################################ End User Input
 
 # Update download note
-download_note = download_note + "_" + LL_lon + "_" + LL_lat + "_" + UR_lon + "_" + UR_lat + "_" + start_date + \
-    "_" + start_time + "_" + end_date + "_" + end_time
+download_note = download_note + "_" + LL_lon + "_" + LL_lat + "_" + UR_lon + "_" + UR_lat
 print("Download Note: " + download_note)
 
 # Request token from Common Metadata Repository using Earthdata credentials
@@ -200,69 +199,93 @@ bbox = bounding_box
 timevar = start_date + 'T' + start_time + ',' + end_date + 'T' + end_time
 # print(timevar)
 
-coverage = '/ancillary_data/atlas_sdp_gps_epoch,\
-/gt1l/land_ice_segments/atl06_quality_summary,\
-/gt1l/land_ice_segments/delta_time,\
-/gt1l/land_ice_segments/h_li,\
-/gt1l/land_ice_segments/geophysical,\
-/gt1r/land_ice_segments/geophysical,\
-/gt2l/land_ice_segments/geophysical,\
-/gt2r/land_ice_segments/geophysical,\
-/gt3l/land_ice_segments/geophysical,\
-/gt3r/land_ice_segments/geophysical,\
-/gt1l/land_ice_segments/h_li_sigma,\
-/gt1l/land_ice_segments/latitude,\
-/gt1l/land_ice_segments/longitude,\
-/gt1l/land_ice_segments/segment_id,\
-/gt1l/land_ice_segments/sigma_geo_h,\
-/gt1r/land_ice_segments/atl06_quality_summary,\
-/gt1r/land_ice_segments/delta_time,\
-/gt1r/land_ice_segments/h_li,\
-/gt1r/land_ice_segments/h_li_sigma,\
-/gt1r/land_ice_segments/latitude,\
-/gt1r/land_ice_segments/longitude,\
-/gt1r/land_ice_segments/segment_id,\
-/gt1r/land_ice_segments/sigma_geo_h,\
-/gt2l/land_ice_segments/atl06_quality_summary,\
-/gt2l/land_ice_segments/delta_time,\
-/gt2l/land_ice_segments/h_li,\
-/gt2l/land_ice_segments/h_li_sigma,\
-/gt2l/land_ice_segments/latitude,\
-/gt2l/land_ice_segments/longitude,\
-/gt2l/land_ice_segments/segment_id,\
-/gt2l/land_ice_segments/sigma_geo_h,\
-/gt2r/land_ice_segments/atl06_quality_summary,\
-/gt2r/land_ice_segments/delta_time,\
-/gt2r/land_ice_segments/h_li,\
-/gt2r/land_ice_segments/h_li_sigma,\
-/gt2r/land_ice_segments/latitude,\
-/gt2r/land_ice_segments/longitude,\
-/gt2r/land_ice_segments/segment_id,\
-/gt2r/land_ice_segments/sigma_geo_h,\
-/gt3l/land_ice_segments/atl06_quality_summary,\
-/gt3l/land_ice_segments/delta_time,\
-/gt3l/land_ice_segments/h_li,\
-/gt3l/land_ice_segments/h_li_sigma,\
-/gt3l/land_ice_segments/latitude,\
-/gt3l/land_ice_segments/longitude,\
-/gt3l/land_ice_segments/segment_id,\
-/gt3l/land_ice_segments/sigma_geo_h,\
-/gt3r/land_ice_segments/atl06_quality_summary,\
-/gt3r/land_ice_segments/delta_time,\
-/gt3r/land_ice_segments/h_li,\
-/gt3r/land_ice_segments/h_li_sigma,\
-/gt3r/land_ice_segments/latitude,\
-/gt3r/land_ice_segments/longitude,\
-/gt3r/land_ice_segments/segment_id,\
-/gt3r/land_ice_segments/sigma_geo_h,\
-/orbit_info/cycle_number,\
-/orbit_info/rgt,\
-/orbit_info/orbit_number' 
+# coverage = "/gt1l/land_ice_segments/dem/dem_h, \
+# /ancillary_data/atlas_sdp_gps_epoch"
+
+coverage = "/gt1l/land_ice_segments/dem/dem_h, \
+/gt1l/land_ice_segments/geophysical/bsnow_h, \
+/gt1l/land_ice_segments/geophysical/bsnow_conf, \
+/gt1l/land_ice_segments/geophysical/bsnow_od, \
+/gt1l/land_ice_segments/geophysical/cloud_flg_asr, \
+/gt1l/land_ice_segments/geophysical/cloud_flg_atm, \
+/gt1l/land_ice_segments/geophysical/msw_flag, \
+/gt1l/land_ice_segments/delta_time, \
+/gt1l/land_ice_segments/h_li, \
+/gt1l/land_ice_segments/latitude, \
+/gt1l/land_ice_segments/longitude, \
+/gt1r/land_ice_segments/dem/dem_h, \
+/gt1r/land_ice_segments/geophysical/bsnow_h, \
+/gt1r/land_ice_segments/geophysical/bsnow_conf, \
+/gt1r/land_ice_segments/geophysical/bsnow_od, \
+/gt1r/land_ice_segments/geophysical/cloud_flg_asr, \
+/gt1r/land_ice_segments/geophysical/cloud_flg_atm, \
+/gt1r/land_ice_segments/geophysical/msw_flag, \
+/gt1r/land_ice_segments/delta_time, \
+/gt1r/land_ice_segments/h_li, \
+/gt1r/land_ice_segments/latitude, \
+/gt1r/land_ice_segments/longitude, \
+/gt2l/land_ice_segments/dem/dem_h, \
+/gt2l/land_ice_segments/geophysical/bsnow_h, \
+/gt2l/land_ice_segments/geophysical/bsnow_conf, \
+/gt2l/land_ice_segments/geophysical/bsnow_od, \
+/gt2l/land_ice_segments/geophysical/cloud_flg_asr, \
+/gt2l/land_ice_segments/geophysical/cloud_flg_atm, \
+/gt2l/land_ice_segments/geophysical/msw_flag, \
+/gt2l/land_ice_segments/delta_time, \
+/gt2l/land_ice_segments/h_li, \
+/gt2l/land_ice_segments/latitude, \
+/gt2l/land_ice_segments/longitude, \
+/gt2r/land_ice_segments/dem/dem_h, \
+/gt2r/land_ice_segments/geophysical/bsnow_h, \
+/gt2r/land_ice_segments/geophysical/bsnow_conf, \
+/gt2r/land_ice_segments/geophysical/bsnow_od, \
+/gt2r/land_ice_segments/geophysical/cloud_flg_asr, \
+/gt2r/land_ice_segments/geophysical/cloud_flg_atm, \
+/gt2r/land_ice_segments/geophysical/msw_flag, \
+/gt2r/land_ice_segments/delta_time, \
+/gt2r/land_ice_segments/h_li, \
+/gt2r/land_ice_segments/latitude, \
+/gt2r/land_ice_segments/longitude, \
+/gt3l/land_ice_segments/dem/dem_h, \
+/gt3l/land_ice_segments/geophysical/bsnow_h, \
+/gt3l/land_ice_segments/geophysical/bsnow_conf, \
+/gt3l/land_ice_segments/geophysical/bsnow_od, \
+/gt3l/land_ice_segments/geophysical/cloud_flg_asr, \
+/gt3l/land_ice_segments/geophysical/cloud_flg_atm, \
+/gt3l/land_ice_segments/geophysical/msw_flag, \
+/gt3l/land_ice_segments/delta_time, \
+/gt3l/land_ice_segments/h_li, \
+/gt3l/land_ice_segments/latitude, \
+/gt3l/land_ice_segments/longitude, \
+/gt3r/land_ice_segments/dem/dem_h, \
+/gt3r/land_ice_segments/geophysical/bsnow_h, \
+/gt3r/land_ice_segments/geophysical/bsnow_conf, \
+/gt3r/land_ice_segments/geophysical/bsnow_od, \
+/gt3r/land_ice_segments/geophysical/cloud_flg_asr, \
+/gt3r/land_ice_segments/geophysical/cloud_flg_atm, \
+/gt3r/land_ice_segments/geophysical/msw_flag, \
+/gt3r/land_ice_segments/delta_time, \
+/gt3r/land_ice_segments/h_li, \
+/gt3r/land_ice_segments/latitude, \
+/gt3r/land_ice_segments/longitude, \
+/gt1l/land_ice_segments/h_li_sigma, \
+/gt1r/land_ice_segments/h_li_sigma, \
+/gt2l/land_ice_segments/h_li_sigma, \
+/gt2r/land_ice_segments/h_li_sigma, \
+/gt3l/land_ice_segments/h_li_sigma, \
+/gt3r/land_ice_segments/h_li_sigma, \
+/gt1l/land_ice_segments/atl06_quality_summary, \
+/gt1r/land_ice_segments/atl06_quality_summary, \
+/gt2l/land_ice_segments/atl06_quality_summary, \
+/gt2r/land_ice_segments/atl06_quality_summary, \
+/gt3l/land_ice_segments/atl06_quality_summary, \
+/gt3r/land_ice_segments/atl06_quality_summary, \
+/ancillary_data/atlas_sdp_gps_epoch"
 
 base_url = 'https://n5eil02u.ecs.nsidc.org/egi/request'
 
 # Set number of granules requested per order, which we will initially set to 10.
-page_size = 10
+page_size = 1000
 
 #Determine number of pages basd on page_size and total granules. Loop requests by this value
 page_num = math.ceil(len(granules)/page_size)
@@ -289,14 +312,12 @@ subset_params = {
     }
 # # print(subset_params)
 
-# Create and clear target directory
-get_ipython().system('mkdir -p Outputs/$download_note')
-get_ipython().system('rm -r Outputs/$download_note')
-
 # Create output directory
 path = str(os.getcwd() + '/Outputs')
 if not os.path.exists(path):
     os.mkdir(path)
+    
+os.system("rm -r " + path + "/*")
     
 # Request data service for each page number, and unzip outputs
 
@@ -385,4 +406,4 @@ for i in range(page_num):
 # Move data into target directory         
 get_ipython().system('mkdir Outputs/$download_note')
 get_ipython().system('mv Outputs/*/* Outputs/$download_note/')
-get_ipython().system('aws s3 sync Outputs/$download_note/ s3://pangeo-data-upload-oregon/icesat2/Snowblower/')
+get_ipython().system('aws s3 sync Outputs/' + download_note + "/ s3://pangeo-data-upload-oregon/icesat2/Snowblower/" + download_note + '/')

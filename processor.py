@@ -139,7 +139,7 @@ def process(fname,bbox=None):
 
     print('out ->',ofile)
 
-def process_all(dir,use_parallel=True,njobs=3):
+def process_all(dir,use_parallel=True,njobs=7):
     """ Processes all .h5 files in the given directory using process().
     """
     all_files = os.listdir(dir)
@@ -166,6 +166,8 @@ def read_h5(fname,vnames=[]):
         data = dict()
         for bk in beam_keys:
             data[bk] = dict()
+            if len(vnames) == 0:
+                vnames = f[bk].keys()
             for vn in vnames:
                 data[bk][vn] = f[bk][vn][:]
     return data

@@ -2,12 +2,12 @@
 
 ## Members
 
-Robbie Mallett (TL)
-Eric Keenan
-Jeffrey Mei
-Tabby Fuson
-Ethan Campbell
-Zheng Liu
+Robbie Mallett (TL)  
+Eric Keenan  
+Jeffrey Mei  
+Tabby Fuson  
+Ethan Campbell  
+Zheng Liu  
 
 ## Science Questions
 

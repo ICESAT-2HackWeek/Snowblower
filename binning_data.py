@@ -1,36 +1,7 @@
-import h5py 
 import numpy as np
-import os, glob
 import cartopy.crs as ccrs
-import cartopy
 import matplotlib.pyplot as plt
-import matplotlib.path as mpath
-def show_plot(ax1):
-	ax1.set_extent([-180, 180, -90, -65], ccrs.PlateCarree())
-	ax1.add_feature(cartopy.feature.LAND)
-	ax1.add_feature(cartopy.feature.OCEAN)
-	theta = np.linspace(0, 2*np.pi, 100)
-	center, radius = [0.5, 0.5], 0.5
-	verts = np.vstack([np.sin(theta), np.cos(theta)]).T
-	circle = mpath.Path(verts * radius + center)
-	ax1.set_boundary(circle, transform=ax1.transAxes)
-	# plt.show()
-	return
-
-def plot_tracks(lon, lat, variable=None, **kwargs):
-	# global ax1
-	if variable is not None:
-		plt.scatter(lon, lat, c=variable, transform = ccrs.PlateCarree(), **kwargs)
-	else:
-		plt.plot(lon, lat, transform = ccrs.PlateCarree(), **kwargs)
-	return 
-
-
-#################################################
-os.chdir("/home/jeffrey/Snowblower/Small_data/")
-ls = glob.glob("*.h5")
-f = h5py.File(ls[-1], 'r') 
-#################################################
+from plot_tracks import show_plot, plot_tracks
 
 fakelons = 180 - np.random.random(50000)*360
 fakelats = (np.random.random(50000)*15+75)*-1
@@ -57,14 +28,8 @@ for i in range(len(meaned_data)):
 		std_data[i, j] = np.std(fake_var[grab_inds])
 
 fig = plt.figure(figsize=(11,8))
-
-import matplotlib.gridspec as gridspec
-
-# Create 2x2 sub plots
-# gs = gridspec.GridSpec(2, 2)
-
+## below section is required to get a nice triangular arrangement
 gs0 = fig.add_gridspec(2, 1)
-
 gs00 = gs0[0].subgridspec(1, 6)
 gs01 = gs0[1].subgridspec(1, 6)
 

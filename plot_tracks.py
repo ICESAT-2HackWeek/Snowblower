@@ -27,7 +27,7 @@ def plot_tracks(lon, lat, variable, time_range = None, **kwargs):
 	return 
 
 #################################################
-os.chdir("/home/jeffrey/Snowblower/Small_data/")
+os.chdir("./Small_data/")
 ls = glob.glob("*.h5")
 f = h5py.File(ls[0], 'r') 
 #################################################

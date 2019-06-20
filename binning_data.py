@@ -56,15 +56,29 @@ for i in range(len(meaned_data)):
 		meaned_data[i, j] = np.mean(fake_var[grab_inds])
 		std_data[i, j] = np.std(fake_var[grab_inds])
 
-plt.figure(figsize=(11,8))
-ax1 = plt.subplot(221, projection=ccrs.SouthPolarStereo())	
+fig = plt.figure(figsize=(11,8))
+
+import matplotlib.gridspec as gridspec
+
+# Create 2x2 sub plots
+# gs = gridspec.GridSpec(2, 2)
+
+gs0 = fig.add_gridspec(2, 1)
+
+gs00 = gs0[0].subgridspec(1, 6)
+gs01 = gs0[1].subgridspec(1, 6)
+
+ax1 = fig.add_subplot(gs00[0,1:5], projection=ccrs.SouthPolarStereo())
+# .subplot(2,2,(1,2), projection=ccrs.SouthPolarStereo())	
 plt.title("Raw data, with noise added")
 plot_tracks(fakelons, fakelats, variable=fake_var, cmap='bwr')
 cbar0 = plt.colorbar(ax=ax1)
 cbar0.set_label("Raw longitude")
 show_plot(ax1)
 
-ax2 = plt.subplot(223, projection=ccrs.SouthPolarStereo())	
+# ax2 = plt.subplot(223, projection=ccrs.SouthPolarStereo())	
+ax2 = fig.add_subplot(gs01[0,:3], projection=ccrs.SouthPolarStereo())
+
 plt.title("Binned (mean) data")
 data_crs = ccrs.PlateCarree()
 xx, yy = np.meshgrid(lon_range, lat_range)
@@ -73,10 +87,13 @@ cbar = plt.colorbar(ax=ax2)
 cbar.set_label("Colorbar Label (unit)")
 show_plot(ax2)
 
-ax3 = plt.subplot(224, projection=ccrs.SouthPolarStereo())	
+# ax3 = plt.subplot(224, projection=ccrs.SouthPolarStereo())	
+ax3 = fig.add_subplot(gs01[0,3:], projection=ccrs.SouthPolarStereo())
 plt.pcolormesh(xx, yy, std_data.T, transform=data_crs)
 cbar2 = plt.colorbar()
 cbar2.set_label("Standard deviation")
 show_plot(ax3)
+
+
 plt.tight_layout()
 plt.show()

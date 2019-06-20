@@ -2,6 +2,7 @@ import numpy as np
 import h5py
 from astropy.time import Time
 import os
+from joblib import Parallel, delayed
 
 def gps2dyr(time):
     """ Convert GPS time to decimal years. """
@@ -136,12 +137,14 @@ def process(fname,bbox=None):
             f[g[1:] + '/msw_flag'] = msw_flag
             f[g[1:] + '/trk_type'] = i_asc
 
-            print('out ->',ofile)
+    print('out ->',ofile)
 
-def process_all(dir):
+def process_all(dir,use_parallel=True,njobs=3):
     """ Processes all .h5 files in the given directory using process().
     """
     all_files = os.listdir(dir)
+    os.chdir(dir)
+    
     if '.DS_Store' in all_files: all_files.remove('.DS_Store')
     remove_these = []
     for fn in all_files:
@@ -149,8 +152,12 @@ def process_all(dir):
             remove_these.append(fn)
     for rfn in remove_these:
         all_files.remove(rfn)
-    for fn in all_files:
-        process(fn)
+
+    if not use_parallel:
+        for fn in all_files:
+            process(fn)
+    else:
+        Parallel(n_jobs=njobs,verbose=5)(delayed(process)(fn) for fn in all_files)
 
 def read_h5(fname,vnames=[]):
     """ Simple HDF5 reader. """

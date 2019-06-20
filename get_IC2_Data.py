@@ -4,6 +4,7 @@ This script only needs to be edited in the user input sections.
 
 The script gathers IceSat-2 processed data with the user defined temporal range and spatial bounding box. 
 It will place data in the AWS S3 cloud (aws s3 ls s3://pangeo-data-upload-oregon/icesat2/Snowblower/).
+Modify to add your NASA Earthdata user id and email.
 You will be prompted for your NASA earth data login
 
 To run the scipt, open a terminal and execute the following command:
@@ -42,6 +43,9 @@ download_note = "AIS_bbox"
 
 # Input data set ID (e.g. ATL06) of interest here, also known as "short name".
 short_name = 'ATL06'
+# option to use subset of variables or all variables. if True , set "coverage"
+# variable below
+use_subset = True
 
 # Input bounding box
 # Input lower left longitude in decimal degrees
@@ -52,6 +56,7 @@ LL_lat = '-90'
 UR_lon = '180'
 # Input upper right latitude in decimal degrees
 UR_lat = '-70'
+
 
 # Input temporal range 
 # Input start date in yyyy-MM-dd format
@@ -66,9 +71,9 @@ end_time = '23:59:59'
 
 # Earthdata Login credentials
 # Enter your Earthdata Login user name
-uid = 'eric_keenan'
+uid = 'liuzheng'
 # Enter your email address associated with your Earthdata Login account
-email = 'test_eric.keenan@colorado.edu'
+email = 'liuzheng@uw.edu'
 pswd = getpass.getpass('Earthdata Login:')
 
 ############################################################ End User Input
@@ -310,6 +315,18 @@ subset_params = {
     'token': token, 
     'email': email, 
     }
+
+# --- complete params for use in request
+if not use_subset:
+    params.update(
+        {
+            'time': timevar, 
+            'bbox': bbox, 
+            'request_mode': request_mode, 
+            'page_size': page_size,  
+            'token': token, 
+            'email': email, } 
+    )
 # # print(subset_params)
 
 # Create output directory
@@ -324,10 +341,13 @@ os.system("rm -r " + path + "/*")
 for i in range(page_num):
     page_val = i + 1
 #     print('Order: ', page_val)
-    subset_params.update( {'page_num': page_val} )
+
+    # choose req_params by subset choice
+    req_params = subset_params if use_subset else params
+    req_params.update( {'page_num': page_val} )
     
 # For all requests other than spatial file upload, use get function
-    request = session.get(base_url, params=subset_params)
+    request = session.get(base_url, params=req_params)
     
 #     print('Request HTTP response: ', request.status_code)
 

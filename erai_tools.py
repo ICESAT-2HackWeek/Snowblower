@@ -1,7 +1,12 @@
 from numpy import *
 import xarray as xr
 import pandas as pd
+import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+import scipy.interpolate as spin
+import pandas.plotting._converter as pandacnv   # only necessary due to Pandas 0.21.0 bug with Datetime plotting
+pandacnv.register()
 from datetime import datetime, timedelta
 import os
 from ecmwfapi import ECMWFDataServer
@@ -40,6 +45,24 @@ Example usage:
     erai_SH_forecast = et.load_ecmwf('Data/ERA_Interim_processed/','erai_SH_forecast.nc')
     erai_total_precip_maud_rise = et.create_reanalysis_series(erai_SH_forecast,param_name='tp',
                                                               nearest_to_lat_lon=(-65,0))
+                    
+                                                              
+    # create along-track time series
+    data_dir = 'Data/ERA_Interim_processed/'
+    erai_analysis_filename = 'erai_SH_analysis.nc'
+    erai_forecast_filename = 'erai_SH_forecast.nc'
+    
+    lats = [-65,-66,-67]
+    lons = [5,6,7]
+    datetimes = [datetime(2018,12,25,4),datetime(2018,12,25,8),datetime(2018,12,25,12)]
+    
+    print('Along-track snowfall rate (in m/s) from the past 2 days at each location:')
+    print(along_track(lats,lons,datetimes,data_dir,erai_analysis_filename,erai_forecast_filename,
+                      temporal='recent_mean',param='snowfall_rate',prior_days=2.0))
+    
+    print('Current along-track wind speed (in m/s):')
+    print(along_track(lats,lons,datetimes,data_dir,erai_analysis_filename,erai_forecast_filename,
+                      temporal='current',param='wind_speed_10_m'))
 
 """
 
@@ -479,6 +502,67 @@ def create_reanalysis_series(dataset,param_name='msl',avg_box=None,nearest_to_la
         index.index = new_index
 
     return index
+
+
+def datetime_to_datenum(datetime_vector):
+    return mdates.datestr2num([str(dt) for dt in datetime_vector])
+
+
+def series_interp(orig_series,new_index,day_interval=(1 / 24)):
+    # note: new_index can be a single Datetime or a range of Datetimes, e.g. [start,end]
+    interpolator = spin.interp1d(datetime_to_datenum(orig_series.index),orig_series.values,
+                                 bounds_error=False,fill_value=NaN)
+    if not isinstance(new_index,datetime):
+        new_index = arange(*new_index,timedelta(days=day_interval))
+    else:
+        new_index = [new_index]
+    interp_data = interpolator(datetime_to_datenum(new_index))
+    return pd.Series(index=new_index,data=interp_data)
+
+
+def loc_history(lat,lon,this_dt,erai_analysis,erai_forecast,prior_days=2.0):
+    erai_analysis_subset = erai_analysis.sel(time=slice(this_dt - timedelta(days=prior_days + 1.0),
+                                                         this_dt + timedelta(days=1.0)))
+    erai_forecast_subset = erai_forecast.sel(time=slice(this_dt - timedelta(days=prior_days + 1.0),
+                                                         this_dt + timedelta(days=1.0)))
+
+    time_range = [this_dt - timedelta(days=prior_days),this_dt]
+
+    recent_sf = create_reanalysis_series(erai_forecast_subset,param_name='sf',nearest_to_lat_lon=(lat,lon))
+    recent_ws = create_reanalysis_series(erai_analysis_subset,param_name='si10',nearest_to_lat_lon=(lat,lon))
+    recent_t2m = create_reanalysis_series(erai_analysis_subset,param_name='t2m',nearest_to_lat_lon=(lat,lon))
+    recent_sf_series = series_interp(recent_sf,time_range)
+    recent_ws_series = series_interp(recent_ws,time_range)
+    recent_t2m_series = series_interp(recent_t2m,time_range)
+
+    data_dict = {'current':{'snowfall_rate':recent_sf_series[-1],
+                            'wind_speed_10_m':recent_ws_series[-1],
+                            'temp_2_m':recent_t2m_series[-1]},
+                 'recent_mean':{'snowfall_rate':mean(recent_sf_series),
+                                'wind_speed_10_m':mean(recent_ws_series),
+                                'temp_2_m':mean(recent_t2m_series)},
+                 'recent_max':{'snowfall_rate':max(recent_sf_series),
+                               'wind_speed_10_m':max(recent_ws_series),
+                               'temp_2_m':max(recent_t2m_series)}}
+    return data_dict
+
+
+def along_track(lats,lons,datetimes,data_dir,erai_analysis_filename,erai_forecast_filename,prior_days=2.0,
+                temporal='recent_mean',param='snowfall_rate'):
+    """
+    Args:
+        lats, lons: NumPy arrays of along-track latitudes and longitudes
+        datetimes: NumPy arrays of along-track Datetime objects
+        prior_days: number of days over which to calculate averages or maxima
+        temporal: {'current','recent_mean','recent_max'}
+        param: {'snowfall_rate','wind_speed_10_m','temp_2_m'}
+
+    """
+    erai_analysis = load_ecmwf(data_dir,erai_analysis_filename)
+    erai_forecast = load_ecmwf(data_dir,erai_forecast_filename)
+
+    return array([loc_history(lats[t_idx],lons[t_idx],datetimes[t_idx],erai_analysis,erai_forecast,
+                              prior_days=prior_days)[temporal][param] for t_idx in range(0,len(datetimes))])
 
 
 def main():

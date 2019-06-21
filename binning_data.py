@@ -48,18 +48,18 @@ def downsample(h5path):
 						all_b_od = bsnow_od[grab_inds]
 						all_b_h = bsnow_h[grab_inds]
 
-						mean_time = np.mean(dt[grab_inds])
-						mean_year = np.mean(dy[grab_inds])
+						mean_time = np.nanmean(dt[grab_inds])
+						mean_year = np.nanmean(dy[grab_inds])
 						filt = np.where(all_b_h<10000)
-						bconf_mean = np.mean(all_b_conf[filt])
-						bod_mean = np.mean(all_b_od[filt])
-						bh_mean = np.mean(all_b_h[filt])
-						bconf_x2 = np.sum(all_b_conf[filt]**2)
-						bod_x2 = np.sum(all_b_od[filt]**2)
-						bh_x2 = np.sum(all_b_h[filt]**2)
+						bconf_mean = np.nanmean(all_b_conf[filt])
+						bod_mean = np.nanmean(all_b_od[filt])
+						bh_mean = np.nanmean(all_b_h[filt])
+						bconf_x2 = np.nansum(all_b_conf[filt]**2)
+						bod_x2 = np.nansum(all_b_od[filt]**2)
+						bh_x2 = np.nansum(all_b_h[filt]**2)
 						pc_seg = len(filt[0])/N*100
 
-						hli_mean = np.mean(all_hli)
+						hli_mean = np.nanmean(all_hli)
 						df2 = [lastr, all_lons.mean(), all_lats.mean(), bconf_mean, bconf_x2, bod_mean, bod_x2, bh_mean,
 							   bh_x2, N, len(filt[0]), pc_seg, hli_mean, mean_time, mean_year]
 						df.loc[l] = df2
@@ -78,9 +78,13 @@ def downsample_all(dir,output_filename,use_parallel=True,njobs=7):
 			remove_these.append(fn)
 	for rfn in remove_these:
 		all_files.remove(rfn)
-	
-	# all_df = []
-	for file in all_files:
-		all_df.append(downsample(dir + '/' + file))
+
+	if not use_parallel:
+		all_df = [downsample(dir + '/' + file) for file in all_files]
+	else:
+		all_df = Parallel(n_jobs=njobs,verbose=5)(delayed(downsample)(dir + '/' + file) for file in all_files)
+
 	final_df = pd.concat(all_df)
 	final_df.to_csv(dir + '/' + output_filename + '.csv')
+
+	print('Success!')

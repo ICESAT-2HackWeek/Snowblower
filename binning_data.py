@@ -16,6 +16,9 @@ def downsample(h5path):
 		l=0
 		for k in range(len(laser_strs)):
 			lastr = laser_strs[k]
+			if lastr+'/lat' not in f.keys():
+				print('NOTE from downsample(): empty file ' + h5path)
+				return None
 			lat = f[lastr+'/lat'][:]
 			lon = f[lastr+'/lon'][:]
 			bsnow_conf = f[lastr+'/bsnow_conf'][:]

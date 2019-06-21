@@ -9,6 +9,7 @@ import pandas.plotting._converter as pandacnv   # only necessary due to Pandas 0
 pandacnv.register()
 from datetime import datetime, timedelta
 import os
+from joblib import Parallel, delayed
 from ecmwfapi import ECMWFDataServer
 
 """
@@ -528,21 +529,26 @@ def series_interp(orig_series,new_index,day_interval=(1 / 24)):
 
 
 def loc_history(lat,lon,this_dt,erai_fields,param_name,prior_days=2.0):
+    this_dt = pd.to_datetime(this_dt)
     erai_fields_subset = erai_fields.sel(time=slice(this_dt - timedelta(days=prior_days + 1.0),
                                                     this_dt + timedelta(days=1.0)))
-
     time_range = [this_dt - timedelta(days=prior_days),this_dt]
 
     recent_padded = create_reanalysis_series(erai_fields_subset,param_name=param_name,nearest_to_lat_lon=(lat,lon))
-    recent_series = series_interp(recent_padded,time_range)
 
-    data_dict = {'current':recent_series[-1],
-                 'recent_mean':mean(recent_series),
-                 'recent_max':max(recent_series)}
+    if sum(isnan(recent_padded)) or len(recent_padded) == 0:
+        data_dict = {'current':nan,
+                     'recent_mean':nan,
+                     'recent_max':nan}
+    else:
+        recent_series = series_interp(recent_padded,time_range)
+        data_dict = {'current':recent_series[-1],
+                     'recent_mean':mean(recent_series),
+                     'recent_max':max(recent_series)}
     return data_dict
 
 
-def along_track(lats,lons,datetimes,erai_fields,param_name,prior_days=2.0):
+def along_track(lats,lons,datetimes,erai_fields,param_name,prior_days=2.0,use_parallel=True,njobs=3):
     """
     Args:
         lats, lons: NumPy arrays of along-track latitudes and longitudes
@@ -551,9 +557,15 @@ def along_track(lats,lons,datetimes,erai_fields,param_name,prior_days=2.0):
         prior_days: number of days over which to calculate averages or maxima
 
     """
-    all_track_data = [loc_history(lats[t_idx],lons[t_idx],datetimes[t_idx],
-                                  erai_fields,param_name,prior_days=prior_days)
-                      for t_idx in range(0,len(datetimes))]
+    if not use_parallel:
+        all_track_data = [loc_history(lats[t_idx],lons[t_idx],datetimes[t_idx],
+                                      erai_fields,param_name,prior_days=prior_days)
+                          for t_idx in range(0,len(datetimes))]
+    else:
+        all_track_data = Parallel(n_jobs=njobs,verbose=5)(delayed(loc_history)(lats[t_idx],lons[t_idx],
+                                                                               datetimes[t_idx],erai_fields,
+                                                                               param_name,prior_days=prior_days)
+                                                          for t_idx in range(0,len(datetimes)))
 
     track_dict = {'current':array([all_track_data[t_idx]['current'] for t_idx in range(0,len(datetimes))]),
                   'recent_mean':array([all_track_data[t_idx]['recent_mean'] for t_idx in range(0,len(datetimes))]),

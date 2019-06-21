@@ -2,6 +2,7 @@ import numpy as np
 import h5py
 import pandas as pd
 import os
+from joblib import Parallel, delayed
 
 def downsample(h5path):
 	lon_range = np.arange(-180, 179.9, 0.75)
@@ -58,7 +59,7 @@ def downsample(h5path):
 						bh_x2 = np.sum(all_b_h[filt]**2)
 						pc_seg = len(filt[0])/N*100
 
-						hli_mean = all_hli[filt]
+						hli_mean = np.mean(all_hli)
 						df2 = [lastr, all_lons.mean(), all_lats.mean(), bconf_mean, bconf_x2, bod_mean, bod_x2, bh_mean,
 							   bh_x2, N, len(filt[0]), pc_seg, hli_mean, mean_time, mean_year]
 						df.loc[l] = df2
@@ -68,7 +69,7 @@ def downsample(h5path):
 	return df
 
 
-def downsample_all(dir,output_filename):
+def downsample_all(dir,output_filename,use_parallel=True,njobs=7):
 	all_files = os.listdir(dir)
 	if '.DS_Store' in all_files: all_files.remove('.DS_Store')
 	remove_these = []
@@ -78,7 +79,7 @@ def downsample_all(dir,output_filename):
 	for rfn in remove_these:
 		all_files.remove(rfn)
 	
-	all_df = []
+	# all_df = []
 	for file in all_files:
 		all_df.append(downsample(dir + '/' + file))
 	final_df = pd.concat(all_df)
